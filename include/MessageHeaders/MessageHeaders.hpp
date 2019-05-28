@@ -11,6 +11,8 @@
  */
 
 #include <memory>
+#include <string>
+#include <vector>
 
 namespace MessageHeaders
 {
@@ -19,6 +21,59 @@ namespace MessageHeaders
      * as defined in RFC 2822 (https://tools.ietf.org/html/rfc2822) 
      */
     class MessageHeaders {
+
+    public:
+        /**
+         * This is how we handle the name of a message header.
+         */
+        typedef std::string HeaderName;
+
+        /**
+         * This is how we handle the value of a message header.
+         */
+        typedef std::string HeaderValue;
+
+        /**
+         * This represents a single header of the internet message.
+         */
+        struct Header {
+            /**
+             * This is the part of a header that comes before the colon.
+             * It identifies the purpose of the header.
+             */
+            HeaderName name;
+
+            /**
+            * This is the part of a header that comes after the colon.
+            * It provides the value, setting, or context whose meaning
+            * depends on the header name.
+            */
+            HeaderValue value;
+
+            // Methods
+            /**
+             * This constructor initializes the header's components.
+             *
+             * @param[in] newName
+             *     This is the part of a header that comes before the colon.
+             *     It identifies the purpose of the header.
+             *
+             * @param[in] newValue
+             *     This is the part of a header that comes after the colon.
+             *     It provides the value, setting, or context whose meaning
+             *     depends on the header name.
+             */
+            Header(
+                const HeaderName& newName,
+                const HeaderValue& newValue
+            );
+        };
+
+        /**
+         * This represents the collection of all headers of the message.
+         */
+        typedef std::vector<Header> Headers;
+
         // Lifecycle management
     public:
         ~MessageHeaders();
@@ -33,6 +88,14 @@ namespace MessageHeaders
          * This is the default constructor.
          */
         MessageHeaders();
+
+        bool ParseFromString(const std::string& rawMessage);
+
+        Headers GetHeaders() const;
+
+        bool HasHeader(const HeaderName& name) const;
+
+        std::string GetBody() const;
 
         // Private properties
     private:
