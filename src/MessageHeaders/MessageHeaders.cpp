@@ -17,6 +17,11 @@ namespace {
     const std::string WSP = " \t";
 
     /**
+     * This is the required line terminator for internet message header lines.
+     */
+    const std::string CRLF = "\r\n";
+
+    /**
      * This function returns a copy of the given string with any
      * whitespace at the beginning and end stripped off.
      *
@@ -107,7 +112,7 @@ namespace MessageHeaders {
 
             for (;;) {
                 const auto nextLineStart = lineTerminator + 2;
-                auto nextLineTerminator = rawMessage.find("\r\n", nextLineStart);
+                auto nextLineTerminator = rawMessage.find(CRLF, nextLineStart);
                 if (nextLineTerminator == std::string::npos) {
                     break;
                 }
@@ -139,10 +144,10 @@ namespace MessageHeaders {
     std::string MessageHeaders::GenerateRawHeaders() const {
         std::ostringstream rawMessage;
         for (const auto& header : impl_->headers) {
-            rawMessage << header.name << ": " << header.value << "\r\n";
+            rawMessage << header.name << ": " << header.value << CRLF;
         }
 
-        rawMessage << "\r\n";
+        rawMessage << CRLF;
         return rawMessage.str();
     }
 
