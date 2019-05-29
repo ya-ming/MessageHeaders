@@ -52,13 +52,17 @@ namespace MessageHeaders {
      */
     struct MessageHeaders::Impl {
         Headers headers;
+        size_t lineLengthLimit = 0;
     };
 
     MessageHeaders::~MessageHeaders() = default;
 
     MessageHeaders::MessageHeaders() 
         : impl_(new Impl) {
+    }
 
+    void MessageHeaders::SetLineLimit(size_t newLineLengthLimit) {
+        impl_->lineLengthLimit = newLineLengthLimit;
     }
 
     bool MessageHeaders::ParseRawMessage(const std::string& rawMessage, size_t& bodyOffset) {
@@ -70,8 +74,10 @@ namespace MessageHeaders {
                 break;
             }
 
-            if (lineTerminator - offset > 998) {
-                return false;
+            if (impl_->lineLengthLimit > 0) {
+                if (lineTerminator - offset + 2> impl_->lineLengthLimit) {
+                    return false;
+                }
             }
 
             if (lineTerminator == offset) {

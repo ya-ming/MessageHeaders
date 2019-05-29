@@ -92,8 +92,8 @@ TEST(MessageHeaderTests, HttpServerResponseMessage) {
 }
 
 TEST(MessageHeaderTests, HeaderLineAlmostTooLong) {
-    MessageHeaders::MessageHeaders msg;
-
+    MessageHeaders::MessageHeaders headers;
+    headers.SetLineLimit(1000);
     const std::string testHeaderName("X-Poggers");
     const std::string testHeaderNameWithDelimiters = testHeaderName + ": ";
     const std::string longestPossiblePoggers(998 - testHeaderNameWithDelimiters.length(), 'X');
@@ -104,13 +104,13 @@ TEST(MessageHeaderTests, HeaderLineAlmostTooLong) {
         + "Accept-Language: en, mi\r\n"
         "\r\n"
         );
-    ASSERT_TRUE(msg.ParseRawMessage(rawMessage));
-    ASSERT_EQ(longestPossiblePoggers, msg.GetHeaderValue(testHeaderName));
+    ASSERT_TRUE(headers.ParseRawMessage(rawMessage));
+    ASSERT_EQ(longestPossiblePoggers, headers.GetHeaderValue(testHeaderName));
 }
 
 TEST(MessageHeaderTests, HeaderLineTooLong) {
-    MessageHeaders::MessageHeaders msg;
-
+    MessageHeaders::MessageHeaders headers;
+    headers.SetLineLimit(1000);
     const std::string testHeaderName("X-Poggers");
     const std::string testHeaderNameWithDelimiters = testHeaderName + ": ";
     const std::string longestPossiblePoggers(999 - testHeaderNameWithDelimiters.length(), 'X');
@@ -121,11 +121,11 @@ TEST(MessageHeaderTests, HeaderLineTooLong) {
         + "Accept-Language: en, mi\r\n"
         "\r\n"
         );
-    ASSERT_FALSE(msg.ParseRawMessage(rawMessage));
+    ASSERT_FALSE(headers.ParseRawMessage(rawMessage));
 }
 
 TEST(MessageHeaderTests, GetValueOfMissingHeader) {
-    MessageHeaders::MessageHeaders msg;
+    MessageHeaders::MessageHeaders headers;
 
     const std::string rawMessage = (
         "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
@@ -133,12 +133,12 @@ TEST(MessageHeaderTests, GetValueOfMissingHeader) {
         "Accept-Language: en, mi\r\n"
         "\r\n"
         );
-    ASSERT_TRUE(msg.ParseRawMessage(rawMessage));
-    ASSERT_EQ("FeelsBadMan", msg.GetHeaderValue("PePe"));
+    ASSERT_TRUE(headers.ParseRawMessage(rawMessage));
+    ASSERT_EQ("FeelsBadMan", headers.GetHeaderValue("PePe"));
 }
 
 TEST(MessageHeaderTests, HeaderWithNonAsciiCharacterInName) {
-    MessageHeaders::MessageHeaders msg;
+    MessageHeaders::MessageHeaders headers;
     const std::string rawMessage = (
         "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
         "Host: www.example.com\r\n"
@@ -146,5 +146,22 @@ TEST(MessageHeaderTests, HeaderWithNonAsciiCharacterInName) {
         "Accept-Language: en, mi\r\n"
         "\r\n"
         );
-    ASSERT_FALSE(msg.ParseRawMessage(rawMessage));
+    ASSERT_FALSE(headers.ParseRawMessage(rawMessage));
 }
+
+TEST(MessageHeadersTests, HeaderLineOver1000CharactersAllowedByDefault) {
+    MessageHeaders::MessageHeaders headers;
+    const std::string testHeaderName("X-Poggers");
+    const std::string testHeaderNameWithDelimiters = testHeaderName + ": ";
+    const std::string valueForHeaderLineLongerThan1000Characters(999 - testHeaderNameWithDelimiters.length(), 'X');
+    const std::string rawMessage = (
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: www.example.com\r\n"
+        + testHeaderNameWithDelimiters + valueForHeaderLineLongerThan1000Characters + "\r\n"
+        + "Accept-Language: en, mi\r\n"
+        "\r\n"
+        );
+    ASSERT_TRUE(headers.ParseRawMessage(rawMessage));
+    ASSERT_EQ(valueForHeaderLineLongerThan1000Characters, headers.GetHeaderValue(testHeaderName));
+}
+
