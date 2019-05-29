@@ -7,13 +7,14 @@
  */
 
 #include <MessageHeaders/MessageHeaders.hpp>
+#include <sstream>
 
 namespace {
     /**
      * These are the characters that are considered white space
      * and should be stripped off by the Strip() functions.
      */
-    constexpr const char* WHITESPACE = " \r\n\t";
+    const std::string WSP = " \t";
 
     /**
      * This function returns a copy of the given string with any
@@ -26,8 +27,8 @@ namespace {
      *      The stripped string is returned.
      */
     std::string StripMarginWhitespace(const std::string& s) {
-        const auto marginLeft = s.find_first_not_of(WHITESPACE);
-        const auto marginRight = s.find_last_not_of(WHITESPACE);
+        const auto marginLeft = s.find_first_not_of(WSP);
+        const auto marginRight = s.find_last_not_of(WSP);
         if (marginLeft == std::string::npos) {
             return "";
         }
@@ -61,7 +62,7 @@ namespace MessageHeaders {
 
     }
 
-    bool MessageHeaders::ParseFromString(const std::string& rawMessage) {
+    bool MessageHeaders::ParseRawMessage(const std::string& rawMessage) {
         size_t offset = 0;
         while (offset < rawMessage.length()) {
             auto lineTerminator = rawMessage.find('\r\n', offset);
@@ -69,6 +70,11 @@ namespace MessageHeaders {
             if (lineTerminator == std::string::npos) {
                 break;
             }
+
+            if (lineTerminator - offset > 998) {
+                return false;
+            }
+
             if (lineTerminator == offset) {
                 offset += 2;
                 break;
@@ -83,15 +89,77 @@ namespace MessageHeaders {
             HeaderName name;
             HeaderValue value;
             name = rawMessage.substr(offset, nameValueDelimiter - offset);
-            value = StripMarginWhitespace(rawMessage.substr(nameValueDelimiter + 1, lineTerminator - nameValueDelimiter - 1));
-            impl_->headers.emplace_back(name, value);
+
+            // Make sure all the header characters are printable
+            for (auto c : name) {
+                if (c < 33 || c > 126) {
+                    return false;
+                }
+            }
+
+            value = rawMessage.substr(nameValueDelimiter + 1, lineTerminator - nameValueDelimiter - 1);
             offset = lineTerminator + 2;
+
+            for (;;) {
+                const auto nextLineStart = lineTerminator + 2;
+                auto nextLineTerminator = rawMessage.find("\r\n", nextLineStart);
+                if (nextLineTerminator == std::string::npos) {
+                    break;
+                }
+                const auto nextLineLength = nextLineTerminator - nextLineStart;
+                if (
+                    (nextLineLength > 2)
+                    && (WSP.find(rawMessage[nextLineStart]) != std::string::npos)
+                    ) {
+                    value += rawMessage.substr(nextLineStart, nextLineLength);
+                    offset = nextLineTerminator + 2;
+                    lineTerminator = nextLineTerminator;
+                }
+                else {
+                    break;
+                }
+            }
+            value = StripMarginWhitespace(value);
+            impl_->headers.emplace_back(name, value);
         }
         impl_->body = rawMessage.substr(offset);
+
+        bool lastCR = false;
+        for (auto c : impl_->body) {
+            if (c == '\r') {
+                lastCR = true;
+            }
+            // \ra
+            // a\n
+            else if ((c == '\n') == !lastCR ) {
+                return false;
+            }
+            else {
+                lastCR = false;
+            }
+        }
+
+        // lone '\r' at the end of body
+        if (lastCR) {
+            return false;
+        }
+
         return true;
     }
 
-    auto MessageHeaders::GetHeaders() const -> Headers {
+    std::string MessageHeaders::GenerateRawMessage() const {
+        std::ostringstream rawMessage;
+        for (const auto& header : impl_->headers) {
+            rawMessage << header.name << ": " << header.value << "\r\n";
+        }
+
+        rawMessage << "\r\n";
+        rawMessage << impl_->body;
+
+        return rawMessage.str();
+    }
+
+    auto MessageHeaders::GetAll() const -> Headers {
         return impl_->headers;
     }
 
@@ -102,6 +170,15 @@ namespace MessageHeaders {
             }
         }
         return false;
+    }
+
+    auto MessageHeaders::GetHeaderValue(const HeaderName& name) const -> HeaderValue {
+        for (const auto& header : impl_->headers) {
+            if (header.name == name) {
+                return header.value;
+            }
+        }
+        return "FeelsBadMan";
     }
 
     std::string MessageHeaders::GetBody() const {

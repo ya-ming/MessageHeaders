@@ -89,13 +89,37 @@ namespace MessageHeaders
          */
         MessageHeaders();
 
-        bool ParseFromString(const std::string& rawMessage);
+        bool ParseRawMessage(const std::string& rawMessage);
 
-        Headers GetHeaders() const;
+        Headers GetAll() const;
 
         bool HasHeader(const HeaderName& name) const;
 
+
+        /**
+         * This method returns the value for the header with the
+         * given name in the message.
+         *
+         * @param[in] name
+         *      This is the name of the header whose value should be returned.
+         *
+         * @return
+         *      The value of the given header is returned.
+         */
+        HeaderValue GetHeaderValue(const HeaderName& name) const;
+
         std::string GetBody() const;
+
+        /**
+         * This method constructs and returns the raw string
+         * internet message based on the headers and body that
+         * have been collected in the object.
+         *
+         * @return
+         *      Ths raw string internet message based on the headers and
+         *      body that have been collected in the object is returned.
+         */
+        std::string GenerateRawMessage() const;
 
         // Private properties
     private:
