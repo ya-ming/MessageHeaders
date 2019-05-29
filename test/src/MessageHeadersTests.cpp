@@ -124,6 +124,18 @@ TEST(MessageHeaderTests, HeaderLineTooLong) {
     ASSERT_FALSE(headers.ParseRawMessage(rawMessage));
 }
 
+TEST(MessageHeadersTests, GetValueOfPresentHeader) {
+    MessageHeaders::MessageHeaders headers;
+    const std::string rawMessage = (
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: www.example.com\r\n"
+        "Accept-Language: en, mi\r\n"
+        "\r\n"
+        );
+    ASSERT_TRUE(headers.ParseRawMessage(rawMessage));
+    ASSERT_EQ("www.example.com", headers.GetHeaderValue("Host"));
+}
+
 TEST(MessageHeaderTests, GetValueOfMissingHeader) {
     MessageHeaders::MessageHeaders headers;
 
@@ -165,3 +177,41 @@ TEST(MessageHeadersTests, HeaderLineOver1000CharactersAllowedByDefault) {
     ASSERT_EQ(valueForHeaderLineLongerThan1000Characters, headers.GetHeaderValue(testHeaderName));
 }
 
+TEST(MessageHeadersTests, SetHeaderAdd) {
+    MessageHeaders::MessageHeaders msg;
+    const std::string rawMessage = (
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: www.example.com\r\n"
+        "Accept-Language: en, mi\r\n"
+        "\r\n"
+        );
+    ASSERT_TRUE(msg.ParseRawMessage(rawMessage));
+    msg.SetHeader("X", "PogChamp");
+    ASSERT_EQ(
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: www.example.com\r\n"
+        "Accept-Language: en, mi\r\n"
+        "X: PogChamp\r\n"
+        "\r\n",
+        msg.GenerateRawHeaders()
+    );
+}
+
+TEST(MessageHeadersTests, SetHeaderReplace) {
+    MessageHeaders::MessageHeaders msg;
+    const std::string rawMessage = (
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: www.example.com\r\n"
+        "Accept-Language: en, mi\r\n"
+        "\r\n"
+        );
+    ASSERT_TRUE(msg.ParseRawMessage(rawMessage));
+    msg.SetHeader("Host", "example.com");
+    ASSERT_EQ(
+        "User-Agent: curl/7.16.3 libcurl/7.16.3 OpenSSL/0.9.7l zlib/1.2.3\r\n"
+        "Host: example.com\r\n"
+        "Accept-Language: en, mi\r\n"
+        "\r\n",
+        msg.GenerateRawHeaders()
+    );
+}

@@ -149,6 +149,18 @@ namespace MessageHeaders
         HeaderValue GetHeaderValue(const HeaderName& name) const;
 
         /**
+         * This method add or replace the header with the given name
+         * to have the given value.
+         *
+         * @param[in] name
+         *      This is the name of the header to add or replace.
+         *
+         * @param[in] value
+         *      This is the value of the header to add or replace.
+         */
+        void SetHeader(const HeaderName& name, const HeaderValue& value);
+
+        /**
          * This method constructs and returns the raw string
          * headers based on the headers that
          * have been collected in the object.

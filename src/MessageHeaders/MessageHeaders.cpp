@@ -167,4 +167,14 @@ namespace MessageHeaders {
         }
         return "FeelsBadMan";
     }
+
+    void MessageHeaders::SetHeader(const HeaderName& name, const HeaderValue& value) {
+        for (auto& header : impl_->headers) {
+            if (header.name == name) {
+                header.value = value;
+                return;
+            }
+        }
+        impl_->headers.emplace_back(name, value);
+    }
 }
