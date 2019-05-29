@@ -95,7 +95,6 @@ namespace MessageHeaders
 
         bool HasHeader(const HeaderName& name) const;
 
-
         /**
          * This method returns the value for the header with the
          * given name in the message.
@@ -108,16 +107,14 @@ namespace MessageHeaders
          */
         HeaderValue GetHeaderValue(const HeaderName& name) const;
 
-        std::string GetBody() const;
-
         /**
          * This method constructs and returns the raw string
-         * internet message based on the headers and body that
+         * internet message based on the headers that
          * have been collected in the object.
          *
          * @return
-         *      Ths raw string internet message based on the headers and
-         *      body that have been collected in the object is returned.
+         *      Ths raw string internet message based on the headers 
+         *      that have been collected in the object is returned.
          */
         std::string GenerateRawMessage() const;
 
