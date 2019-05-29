@@ -41,12 +41,12 @@
 
     ASSERT_TRUE(msg.HasHeader("Host"));
     ASSERT_FALSE(msg.HasHeader("Foobar"));
-    ASSERT_EQ(rawMessage, msg.GenerateRawMessage());
+    ASSERT_EQ(rawMessage, msg.GenerateRawHeaders());
 }
 
 TEST(MessageHeaderTests, HttpServerResponseMessage) {
     MessageHeaders::MessageHeaders msg;
-    const std::string rawMessage = (
+    const std::string rawHeaders = (
         "Date: Mon, 27 Jul 2009 12:28:53 GMT\r\n"
         "Server: Apache\r\n"
         "Last-Modified: Wed, 22 Jul 2009 19:15:56 GMT\r\n"
@@ -57,8 +57,14 @@ TEST(MessageHeaderTests, HttpServerResponseMessage) {
         "Content-Type: text/plain\r\n"
         "\r\n"
     );
+    const std::string rawMessage = (
+        rawHeaders
+        + "Hello World! My payload includes a tailing CRLF.\r\n"
+        );
 
-    ASSERT_TRUE(msg.ParseRawMessage(rawMessage));
+    size_t bodyOffset;
+    ASSERT_TRUE(msg.ParseRawMessage(rawMessage, bodyOffset));
+    ASSERT_EQ(rawHeaders.length(), bodyOffset);
 
     const auto headers = msg.GetAll();
     struct ExpectedHeader {
@@ -82,7 +88,7 @@ TEST(MessageHeaderTests, HttpServerResponseMessage) {
     }
     ASSERT_TRUE(msg.HasHeader("Last-Modified"));
     ASSERT_FALSE(msg.HasHeader("Foobar"));
-    ASSERT_EQ(rawMessage, msg.GenerateRawMessage());
+    ASSERT_EQ(rawHeaders, msg.GenerateRawHeaders());
 }
 
 TEST(MessageHeaderTests, HeaderLineAlmostTooLong) {
