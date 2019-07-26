@@ -248,7 +248,7 @@ namespace MessageHeaders {
             }
 
             if (impl_->lineLengthLimit > 0) {
-                if (lineTerminator - offset + 2> impl_->lineLengthLimit) {
+                if (lineTerminator + CRLF.length() - offset> impl_->lineLengthLimit) {
                     return false;
                 }
             }
@@ -276,21 +276,21 @@ namespace MessageHeaders {
             }
 
             value = rawMessage.substr(nameValueDelimiter + 1, lineTerminator - nameValueDelimiter - 1);
-            offset = lineTerminator + 2;
+            offset = lineTerminator + CRLF.length();
 
             for (;;) {
-                const auto nextLineStart = lineTerminator + 2;
+                const auto nextLineStart = lineTerminator + CRLF.length();
                 auto nextLineTerminator = rawMessage.find(CRLF, nextLineStart);
                 if (nextLineTerminator == std::string::npos) {
                     break;
                 }
                 const auto nextLineLength = nextLineTerminator - nextLineStart;
                 if (
-                    (nextLineLength > 2)
+                    (nextLineLength > CRLF.length())
                     && (WSP.find(rawMessage[nextLineStart]) != std::string::npos)
                     ) {
                     value += rawMessage.substr(nextLineStart, nextLineLength);
-                    offset = nextLineTerminator + 2;
+                    offset = nextLineTerminator + CRLF.length();
                     lineTerminator = nextLineTerminator;
                 }
                 else {
