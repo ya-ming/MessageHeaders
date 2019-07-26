@@ -238,14 +238,14 @@ TEST(MessageHeadersTests, FoldLineThatWouldExceedLimit) {
     };
 
     std::vector< TestVector > testVectors{
-        // ....................... {"..........", "..........", ".........."}}
-        {"Hello!",                {"X: Hello!",                               ""}},
+        // ...................... {"..........", "..........", "..........",  ""}}
+        {"Hello!",                {"X: Hello!" ,                              ""}},
         {"Hello!!",               {"X: Hello!!",                              ""}},
         // return empty string if sub string can't fit into one line (limited by lime limit
         {"Hello!!!",              {                                           ""}},
-        {"Hello, World!",         {"X: Hello," , " World!",                   ""}},
-        {"This is even longer!",  {"X: This is", " even",      " longer!",    ""}},
-        {"This is even long er!", {"X: This is", " even long", " er!",        ""}},
+        {"Hello, World!",         {"X: Hello," , " World!"   ,                ""}},
+        {"This is even longer!",  {"X: This is", " even"     , " longer!"  ,  ""}},
+        {"This is even long er!", {"X: This is", " even long", " er!"      ,  ""}},
         {"This is evenlonger!",   {                                           ""}},
         {"sadfjkasdfjlkasdfjla",  {                                           ""}},
     };
