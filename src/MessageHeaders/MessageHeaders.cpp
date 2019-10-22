@@ -6,6 +6,7 @@
  * 2019 by YaMing Wu
  */
 
+#include <ctype.h>
 #include <functional>
 #include <MessageHeaders/MessageHeaders.hpp>
 #include <sstream>
@@ -180,7 +181,17 @@ namespace MessageHeaders {
     }
 
     bool MessageHeaders::HeaderName::operator==(const HeaderName& rhs) const noexcept {
-        return name_ == rhs.name_;
+        if (name_.length() != rhs.name_.length()) {
+            return false;
+        }
+
+        for (size_t i = 0; i < name_.length(); ++i) {
+            if (tolower(name_[i]) != tolower(rhs.name_[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     MessageHeaders::HeaderName::operator const std::string&() const noexcept {
