@@ -266,6 +266,8 @@ namespace MessageHeaders {
         : impl_(new Impl) {
     }
 
+    MessageHeaders& MessageHeaders::operator=(MessageHeaders&&) = default;
+
     void MessageHeaders::SetLineLimit(size_t newLineLengthLimit) {
         impl_->lineLengthLimit = newLineLengthLimit;
     }
@@ -316,12 +318,15 @@ namespace MessageHeaders {
                 if (nextLineTerminator == std::string::npos) {
                     break;
                 }
-                const auto nextLineLength = nextLineTerminator - nextLineStart;
+                auto nextLineLength = nextLineTerminator - nextLineStart;
                 if (
                     (nextLineLength > CRLF.length())
                     && (WSP.find(rawMessage[nextLineStart]) != std::string::npos)
                     ) {
-                    value += rawMessage.substr(nextLineStart, nextLineLength);
+                    value += ' ';
+                    const auto firstNonWhitespaceInNextLine = rawMessage.find_first_not_of(WSP, nextLineStart);
+                    nextLineLength -= (firstNonWhitespaceInNextLine - nextLineStart);
+                    value += rawMessage.substr(firstNonWhitespaceInNextLine, nextLineLength);
                     offset = nextLineTerminator + CRLF.length();
                     lineTerminator = nextLineTerminator;
                 }

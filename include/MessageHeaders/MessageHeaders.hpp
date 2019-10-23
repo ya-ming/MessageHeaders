@@ -163,7 +163,7 @@ namespace MessageHeaders
         MessageHeaders(const MessageHeaders&) = delete;
         MessageHeaders(MessageHeaders&&) = delete;
         MessageHeaders& operator=(const MessageHeaders&) = delete;
-        MessageHeaders& operator=(MessageHeaders&&) = delete;
+        MessageHeaders& operator=(MessageHeaders&&);
 
         // public methods
     public:
