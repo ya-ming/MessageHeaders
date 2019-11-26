@@ -161,7 +161,7 @@ namespace MessageHeaders
     public:
         ~MessageHeaders();
         MessageHeaders(const MessageHeaders&) = delete;
-        MessageHeaders(MessageHeaders&&) = delete;
+        MessageHeaders(MessageHeaders&&);
         MessageHeaders& operator=(const MessageHeaders&) = delete;
         MessageHeaders& operator=(MessageHeaders&&);
 
@@ -187,6 +187,16 @@ namespace MessageHeaders
          * This method determines the headers and body
          * of the message by parsing the raw message from a string.
          *
+         * @note
+         *     This method does not clear any previous headers
+         *     parsed or added to the class instance.  This may
+         *     be useful because you can call ParseRawMessage
+         *     multiple times to parse a message in fragments.
+         *     However, if you're reusing a MessageHeaders, you
+         *     may accidentally combine headers from an old message
+         *     with a new message, if you don't create a new
+         *     message object first.
+         *
          *@param[in] rawMessage
          *     This is the string rendering of the message to parse.
          *
@@ -204,6 +214,16 @@ namespace MessageHeaders
         /**
          * This method determines the headers
          * of the message by parsing the raw message from a string.
+         *
+         * @note
+         *     This method does not clear any previous headers
+         *     parsed or added to the class instance.  This may
+         *     be useful because you can call ParseRawMessage
+         *     multiple times to parse a message in fragments.
+         *     However, if you're reusing a MessageHeaders, you
+         *     may accidentally combine headers from an old message
+         *     with a new message, if you don't create a new
+         *     message object first.
          *
          * @param[in] rawMessage
          *     This is the string rendering of the message to parse.
@@ -230,6 +250,19 @@ namespace MessageHeaders
          *      The value of the given header is returned.
          */
         HeaderValue GetHeaderValue(const HeaderName& name) const;
+
+        /**
+         * This method returns the sequence of values for the header with the
+         * given name in the message.
+         *
+         * @param[in] name
+         *      This is the name of the header whose value should be returned.
+         *
+         * @retval {}
+         *      This is returned if there is no header with the given name
+         *      in the message.
+         */
+        std::vector<HeaderValue> GetHeaderMultiValue(const HeaderName& name) const;
 
         /**
          * This method add or replace the header with the given name

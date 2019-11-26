@@ -261,12 +261,12 @@ namespace MessageHeaders {
     };
 
     MessageHeaders::~MessageHeaders() = default;
+    MessageHeaders::MessageHeaders(MessageHeaders&&) = default;
+    MessageHeaders& MessageHeaders::operator=(MessageHeaders&&) = default;
 
     MessageHeaders::MessageHeaders() 
         : impl_(new Impl) {
     }
-
-    MessageHeaders& MessageHeaders::operator=(MessageHeaders&&) = default;
 
     void MessageHeaders::SetLineLimit(size_t newLineLengthLimit) {
         impl_->lineLengthLimit = newLineLengthLimit;
@@ -410,12 +410,31 @@ namespace MessageHeaders {
     }
 
     auto MessageHeaders::GetHeaderValue(const HeaderName& name) const -> HeaderValue {
+        std::string compositeValue;
+        bool isFirstValue = true;
         for (const auto& header : impl_->headers) {
             if (header.name == name) {
-                return header.value;
+                if (isFirstValue) {
+                    isFirstValue = false;
+                }
+                else {
+                    compositeValue += ',';
+                }
+                compositeValue += header.value;
             }
         }
-        return "FeelsBadMan";
+        return compositeValue;
+    }
+
+    auto MessageHeaders::GetHeaderMultiValue(const HeaderName& name) const -> std::vector<HeaderValue> {
+        std::vector<HeaderValue> values;
+        bool isFirstValue = true;
+        for (const auto& header : impl_->headers) {
+            if (header.name == name) {
+                values.push_back(header.value);
+            }
+        }
+        return values;
     }
 
     void MessageHeaders::SetHeader(const HeaderName& name, const HeaderValue& value) {
