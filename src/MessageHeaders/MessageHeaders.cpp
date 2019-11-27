@@ -491,6 +491,22 @@ namespace MessageHeaders {
             value = StripMarginWhitespace(value);
             impl_->headers.emplace_back(name, value);
         }
+
+        /*
+            Empty string and a single truncated line were not being
+            detected as bad messages.  If there is at least one line,
+            it gets detected as a bad message because of the lack
+            of a "next line" when looking ahead to see if line unfolding
+            needs to be done.  Unfortunately, if there isn't even one
+            complete line, there was no unfolding check at all.
+
+            Solve this problem by checking at the end to see that at least
+            one line was parsed from the raw message.
+        */
+        if (offset == 0) {
+            return false;
+        }
+
         bodyOffset = offset;
         return true;
     }
