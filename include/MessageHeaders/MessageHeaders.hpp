@@ -90,7 +90,7 @@ namespace MessageHeaders
              * @return
              *     The beginning iterator of the sequence is returned.
              */
-            auto begin() const;
+            std::string::const_iterator begin() const;
 
             /**
              * This method is used in range-for constructs, to get
@@ -101,7 +101,7 @@ namespace MessageHeaders
              * @return
              *     The ending iterator of the sequence is returned.
              */
-            auto end() const;
+            std::string::const_iterator end() const;
 
             // Private Properties
         private:
