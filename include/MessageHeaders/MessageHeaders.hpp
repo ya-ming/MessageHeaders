@@ -265,7 +265,7 @@ namespace MessageHeaders
         std::vector<HeaderValue> GetHeaderMultiValue(const HeaderName& name) const;
 
         /**
-         * This method add or replace the header with the given name
+         * This method adds or replaces the header with the given name
          * to have the given value.
          *
          * @param[in] name
@@ -275,6 +275,61 @@ namespace MessageHeaders
          *      This is the value of the header to add or replace.
          */
         void SetHeader(const HeaderName& name, const HeaderValue& value);
+
+        /**
+         * This method adds or replaces the header with the given name,
+         * to have the given values.
+         *
+         * @param[in] name
+         *     This is the name of the header to add or replace.
+         *
+         * @param[in] values
+         *     These are the values of the header to add or replace.
+         *
+         * @param[in] oneLine
+         *     This specifies whether or not to combine the values
+         *     into one header line, with values separated by colons.
+         */
+        void SetHeader(
+            const HeaderName& name,
+            const std::vector<HeaderValue>& values,
+            bool oneLine
+        );
+
+        /**
+         * This method adds the header with the given name,
+         * to have the given value.
+         *
+         * @param[in] name
+         *     This is the name of the header to add.
+         *
+         * @param[in] value
+         *     This is the value of the header to add.
+         */
+        void AddHeader(
+            const HeaderName& name,
+            const HeaderValue& value
+        );
+
+        /**
+         * This method adds the header with the given name,
+         * to have the given values.
+         *
+         * @param[in] name
+         *     This is the name of the header to add.
+         *
+         * @param[in] values
+         *     These are the values of the header to add.
+         *
+         * @param[in] oneLine
+         *     This specifies whether or not to combine the values
+         *     into one header line, with values separated by colons.
+         */
+        void AddHeader(
+            const HeaderName& name,
+            const std::vector<HeaderValue>& values,
+            bool oneLine
+        );
 
         /**
          * This method constructs and returns the raw string
